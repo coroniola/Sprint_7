@@ -3,7 +3,7 @@ import random
 import requests
 from settings import Urls
 import allure
-
+from data import TestOrderData
 class Delivery:
     @allure.step("Генерируем данные для курьера (логин, пароль, имя)")
 
@@ -13,45 +13,21 @@ class Delivery:
         random_string = ''.join(random.choice(letters) for _ in range(len))
         return random_string
 
-
+    @staticmethod
     @allure.step("Получаем данные для регистрации курьера, отправляем запрос на регистрацию")
-    def registration_courier(self):
+    def registration_courier(courier_data):
         login_password = []
-        login = Delivery.generate_random_string(10)
-        password = Delivery.generate_random_string(10)
-        name = Delivery.generate_random_string(10)
-        payload = {
-            'login': login,
-            "password": password,
-            'name': name
-        }
+        payload = courier_data
         response = requests.post(Urls.CREATE_COURIER, data=payload)
 
         if response.status_code == 201:
             login_password = {
-                "login": login,
-                "password": password,
-                "Name": name
+                "login": payload['login'],
+                "password": payload['password'],
+                "name": payload['name']
             }
 
-        return {'login_pass': login_password, 'response': response}
-
-
-
-class TestOrderData:
-    ORDER_BODY_DATA = {
-        "firstName": "Naruto",
-        "lastName": "Uchiha",
-        "address": "Konoha, 142 apt.",
-        "metroStation": 4,
-        "phone": "+7 800 355 35 35",
-        "rentTime": 5,
-        "deliveryDate": "2020-06-06",
-        "comment": "Saske, come back to Konoha",
-        "color": [
-            "BLACK"
-        ]
-    }
+        return {'login_password': login_password, 'response': response}
 
 class ChangeTestData:
     @staticmethod
